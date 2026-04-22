@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unity Rides — Ride Green. Ride Easy.</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #060c09;
+    --surface: #0e1a12;
+    --card: #111d15;
+    --green: #3dff7a;
+    --green-dim: #1aff5a44;
+    --green-mid: #27c95a;
+    --white: #eef5f0;
+    --muted: #7a9180;
+    --border: #1e3328;
+    --accent2: #c8ff6e;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* Custom cursor */
+  .cursor {
+    width: 12px; height: 12px;
+    background: var(--green);
+    border-radius: 50%;
+    position: fixed; pointer-events: none; z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: transform 0.1s, width 0.2s, height 0.2s, background 0.2s;
+    mix-blend-mode: screen;
+  }
+  .cursor-ring {
+    width: 36px; height: 36px;
+    border: 1.5px solid var(--green);
+    border-radius: 50%;
+    position: fixed; pointer-events: none; z-index: 9998;
+    transform: translate(-50%, -50%);
+    transition: transform 0.18s ease, width 0.2s, height 0.2s;
+    opacity: 0.5;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--green-mid); border-radius: 2px; }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.4rem 4rem;
+    background: linear-gradient(to bottom, rgba(6,12,9,0.95), transparent);
+    backdrop-filter: blur(8px);
+  }
+  .nav-logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800; font-size: 1.4rem;
+    color: var(--green);
+    letter-spacing: -0.02em;
+  }
+  .nav-logo span { color: var(--white); }
+  .nav-links { display: flex; gap: 2.4rem; list-style: none; }
+  .nav-links a {
+    color: var(--muted); text-decoration: none;
+    font-size: 0.9rem; font-weight: 500;
+    transition: color 0.2s;
+    letter-spacing: 0.02em;
+  }
+  .nav-links a:hover { color: var(--green); }
+  .nav-cta {
+    background: var(--green); color: var(--bg);
+    border: none; padding: 0.6rem 1.4rem;
+    border-radius: 2rem; font-family: 'Syne', sans-serif;
+    font-weight: 700; font-size: 0.85rem;
+    cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .nav-cta:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 24px var(--green-mid);
+  }
+
+  /* GRID BG */
+  .grid-bg {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black 30%, transparent 100%);
+    pointer-events: none;
+  }
+
+  /* HERO */
+  .hero {
+    position: relative; min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    text-align: center; overflow: hidden;
+    padding: 8rem 2rem 4rem;
+  }
+  .hero-glow {
+    position: absolute;
+    width: 700px; height: 700px;
+    background: radial-gradient(circle, #1aff5a18 0%, transparent 70%);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    background: var(--green-dim);
+    border: 1px solid #3dff7a33;
+    color: var(--green); font-size: 0.8rem;
+    padding: 0.35rem 1rem; border-radius: 2rem;
+    margin-bottom: 2rem;
+    font-weight: 500; letter-spacing: 0.08em;
+    text-transform: uppercase;
+    animation: fadeUp 0.8s ease both;
+  }
+  .hero-badge::before {
+    content: ''; width: 7px; height: 7px;
+    background: var(--green); border-radius: 50%;
+    animation: pulse 1.5s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.7); }
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(3rem, 8vw, 7rem);
+    font-weight: 800; line-height: 1;
+    letter-spacing: -0.03em;
+    animation: fadeUp 0.8s 0.1s ease both;
+  }
+  h1 .line-green { color: var(--green); display: block; }
+  h1 .line-dim { color: var(--muted); font-size: 0.6em; font-weight: 400; font-family: 'DM Sans', sans-serif; display: block; margin-top: 0.3em; }
+
+  .hero-sub {
+    max-width: 520px; margin: 2rem auto;
+    color: var(--muted); font-size: 1.1rem;
+    line-height: 1.7;
+    animation: fadeUp 0.8s 0.2s ease both;
+  }
+  .hero-buttons {
+    display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;
+    margin-top: 2.5rem;
+    animation: fadeUp 0.8s 0.3s ease both;
+  }
+  .btn-primary {
+    background: var(--green); color: var(--bg);
+    border: none; padding: 0.9rem 2.2rem;
+    border-radius: 3rem; font-family: 'Syne', sans-serif;
+    font-size: 1rem; font-weight: 700;
+    cursor: pointer; transition: all 0.3s;
+    box-shadow: 0 0 30px #3dff7a33;
+  }
+  .btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 40px #3dff7a55;
+  }
+  .btn-outline {
+    background: transparent;
+    border: 1.5px solid var(--border);
+    color: var(--white); padding: 0.9rem 2.2rem;
+    border-radius: 3rem; font-family: 'Syne', sans-serif;
+    font-size: 1rem; font-weight: 600;
+    cursor: pointer; transition: all 0.3s;
+  }
+  .btn-outline:hover {
+    border-color: var(--green); color: var(--green);
+    transform: translateY(-3px);
+  }
+
+  .hero-stats {
+    display: flex; gap: 3rem; justify-content: center; flex-wrap: wrap;
+    margin-top: 4rem;
+    animation: fadeUp 0.8s 0.4s ease both;
+  }
+  .stat { text-align: center; }
+  .stat-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 2.2rem; font-weight: 800;
+    color: var(--green); line-height: 1;
+  }
+  .stat-label { font-size: 0.8rem; color: var(--muted); margin-top: 0.3rem; text-transform: uppercase; letter-spacing: 0.06em; }
+
+  /* FLOATING BIKES */
+  .bike-float {
+    position: absolute; font-size: 4rem;
+    opacity: 0.06; animation: float 6s ease-in-out infinite;
+    pointer-events: none;
+  }
+  .bike-float:nth-child(1) { top: 20%; left: 8%; animation-delay: 0s; }
+  .bike-float:nth-child(2) { top: 60%; right: 8%; animation-delay: 2s; font-size: 2.5rem; }
+  .bike-float:nth-child(3) { bottom: 20%; left: 20%; animation-delay: 4s; font-size: 3rem; }
+  @keyframes float {
+    0%, 100% { transform: translateY(0) rotate(-5deg); }
+    50% { transform: translateY(-20px) rotate(5deg); }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* SECTION COMMONS */
+  section { padding: 6rem 2rem; }
+  .container { max-width: 1100px; margin: 0 auto; }
+  .section-label {
+    font-size: 0.75rem; text-transform: uppercase;
+    letter-spacing: 0.15em; color: var(--green);
+    font-weight: 600; margin-bottom: 1rem;
+  }
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    font-weight: 800; line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.5rem;
+  }
+  .section-desc { color: var(--muted); font-size: 1.05rem; line-height: 1.8; max-width: 560px; }
+
+  /* MARQUEE */
+  .marquee-wrap {
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 1.2rem 0;
+    overflow: hidden;
+    background: var(--surface);
+  }
+  .marquee-track {
+    display: flex; width: max-content;
+    animation: marquee 18s linear infinite;
+    gap: 4rem;
+  }
+  .marquee-item {
+    white-space: nowrap; font-family: 'Syne', sans-serif;
+    font-size: 0.85rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--muted); display: flex; align-items: center; gap: 1rem;
+  }
+  .marquee-dot { color: var(--green); font-size: 1.2rem; }
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  /* PROBLEMS */
+  .problems-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem; margin-top: 4rem;
+  }
+  .problem-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 1.2rem; padding: 2rem;
+    transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+    position: relative; overflow: hidden;
+  }
+  .problem-card::before {
+    content: ''; position: absolute;
+    top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--green), transparent);
+    opacity: 0; transition: opacity 0.3s;
+  }
+  .problem-card:hover {
+    transform: translateY(-6px);
+    border-color: #3dff7a33;
+    box-shadow: 0 16px 40px rgba(61,255,122,0.08);
+  }
+  .problem-card:hover::before { opacity: 1; }
+  .problem-icon { font-size: 2.2rem; margin-bottom: 1.2rem; }
+  .problem-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700; font-size: 1rem;
+    margin-bottom: 0.6rem; color: var(--white);
+  }
+  .problem-text { font-size: 0.9rem; color: var(--muted); line-height: 1.7; }
+  .problem-solution {
+    margin-top: 1rem; font-size: 0.82rem;
+    color: var(--green); font-weight: 500;
+    display: flex; align-items: flex-start; gap: 0.4rem;
+  }
+
+  /* FEATURES / HOW IT WORKS */
+  .how-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 5rem;
+    align-items: center; margin-top: 4rem;
+  }
+  @media(max-width: 768px) { .how-grid { grid-template-columns: 1fr; gap: 3rem; } }
+  .phone-mockup {
+    position: relative;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 2.5rem; padding: 1.5rem;
+    max-width: 280px; margin: 0 auto;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.5), 0 0 0 1px #1e3328;
+  }
+  .phone-screen {
+    background: var(--surface);
+    border-radius: 1.8rem;
+    padding: 1.5rem; min-height: 380px;
+    display: flex; flex-direction: column; gap: 1rem;
+    overflow: hidden;
+  }
+  .phone-header {
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .phone-logo { font-family: 'Syne', sans-serif; font-size: 0.9rem; font-weight: 800; color: var(--green); }
+  .phone-notif {
+    width: 8px; height: 8px; background: var(--green);
+    border-radius: 50%; animation: pulse 2s infinite;
+  }
+  .map-area {
+    background: linear-gradient(135deg, #0a1a0e, #0f2218);
+    border-radius: 1rem; height: 160px;
+    position: relative; overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .map-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(#1a3a2233 1px, transparent 1px),
+      linear-gradient(90deg, #1a3a2233 1px, transparent 1px);
+    background-size: 30px 30px;
+  }
+  .map-pin {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 16px; height: 16px;
+    background: var(--green); border-radius: 50%;
+    box-shadow: 0 0 20px var(--green);
+    animation: ping 1.5s ease-out infinite;
+  }
+  @keyframes ping {
+    0% { box-shadow: 0 0 0 0 rgba(61,255,122,0.6); }
+    100% { box-shadow: 0 0 0 20px rgba(61,255,122,0); }
+  }
+  .bike-dots {
+    position: absolute;
+    width: 8px; height: 8px;
+    background: var(--accent2); border-radius: 50%;
+  }
+  .bike-dots:nth-child(2) { top: 30%; left: 25%; }
+  .bike-dots:nth-child(3) { top: 60%; right: 30%; }
+  .bike-dots:nth-child(4) { bottom: 25%; left: 55%; }
+  .map-label {
+    position: absolute; bottom: 8px; left: 8px;
+    font-size: 0.65rem; color: var(--green); font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+  .ride-btn {
+    background: var(--green); color: var(--bg);
+    border: none; border-radius: 0.8rem; padding: 0.8rem;
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.85rem;
+    text-align: center;
+  }
+  .info-row {
+    display: flex; justify-content: space-between;
+    background: var(--card); border-radius: 0.8rem; padding: 0.8rem;
+    border: 1px solid var(--border);
+  }
+  .info-item { text-align: center; }
+  .info-val { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.95rem; color: var(--green); }
+  .info-key { font-size: 0.7rem; color: var(--muted); margin-top: 0.2rem; }
+
+  .steps { display: flex; flex-direction: column; gap: 2rem; }
+  .step { display: flex; gap: 1.5rem; align-items: flex-start; }
+  .step-num {
+    width: 40px; height: 40px; min-width: 40px;
+    background: var(--green-dim); border: 1px solid #3dff7a44;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 0.85rem; color: var(--green);
+  }
+  .step-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1rem; margin-bottom: 0.4rem; }
+  .step-desc { color: var(--muted); font-size: 0.9rem; line-height: 1.7; }
+
+  /* BUSINESS MODEL */
+  .biz-section { background: var(--surface); }
+  .biz-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem; margin-top: 4rem;
+  }
+  .biz-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 1.4rem; padding: 2rem;
+    position: relative; overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+  .biz-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 50px rgba(61,255,122,0.07);
+  }
+  .biz-card-accent {
+    position: absolute; top: -30px; right: -30px;
+    width: 100px; height: 100px;
+    background: radial-gradient(circle, #3dff7a11, transparent);
+    border-radius: 50%;
+  }
+  .biz-icon { font-size: 2rem; margin-bottom: 1.2rem; }
+  .biz-title {
+    font-family: 'Syne', sans-serif; font-weight: 700;
+    font-size: 1.05rem; margin-bottom: 0.6rem;
+  }
+  .biz-desc { font-size: 0.88rem; color: var(--muted); line-height: 1.7; }
+  .biz-tag {
+    display: inline-block; margin-top: 1.2rem;
+    background: var(--green-dim); color: var(--green);
+    font-size: 0.75rem; padding: 0.25rem 0.8rem; border-radius: 2rem;
+    font-weight: 600;
+  }
+
+  /* MARKET */
+  .market-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 4rem;
+    align-items: center; margin-top: 4rem;
+  }
+  @media(max-width:768px){ .market-grid{ grid-template-columns:1fr; } }
+  .market-bars { display: flex; flex-direction: column; gap: 1.4rem; }
+  .bar-item {}
+  .bar-label {
+    display: flex; justify-content: space-between;
+    font-size: 0.85rem; color: var(--muted); margin-bottom: 0.6rem;
+  }
+  .bar-label span:last-child { color: var(--green); font-weight: 600; font-family: 'Syne', sans-serif; }
+  .bar-track {
+    height: 6px; background: var(--border); border-radius: 3px; overflow: hidden;
+  }
+  .bar-fill {
+    height: 100%; background: linear-gradient(90deg, var(--green-mid), var(--accent2));
+    border-radius: 3px; transform-origin: left;
+    animation: barGrow 1.2s ease both;
+  }
+  @keyframes barGrow {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+  }
+  .market-points { display: flex; flex-direction: column; gap: 1.2rem; }
+  .market-point {
+    display: flex; gap: 1rem; align-items: flex-start;
+    padding: 1.2rem; background: var(--card);
+    border: 1px solid var(--border); border-radius: 1rem;
+    transition: border-color 0.3s;
+  }
+  .market-point:hover { border-color: #3dff7a44; }
+  .mp-icon { font-size: 1.4rem; }
+  .mp-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.95rem; margin-bottom: 0.3rem; }
+  .mp-desc { font-size: 0.85rem; color: var(--muted); }
+
+  /* TEAM */
+  .team-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem; margin-top: 4rem;
+  }
+  .team-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 1.4rem; padding: 2rem; text-align: center;
+    transition: transform 0.3s, border-color 0.3s;
+  }
+  .team-card:hover { transform: translateY(-5px); border-color: #3dff7a33; }
+  .avatar {
+    width: 64px; height: 64px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--green-mid), var(--accent2));
+    margin: 0 auto 1.2rem; display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.2rem; color: var(--bg);
+  }
+  .team-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.95rem; }
+  .team-id { font-size: 0.78rem; color: var(--muted); margin-top: 0.3rem; }
+  .team-role {
+    display: inline-block; margin-top: 0.8rem;
+    background: var(--green-dim); color: var(--green);
+    font-size: 0.72rem; padding: 0.2rem 0.7rem; border-radius: 2rem;
+    font-weight: 600; letter-spacing: 0.03em;
+  }
+
+  /* CTA */
+  .cta-section {
+    text-align: center; padding: 8rem 2rem;
+    position: relative; overflow: hidden;
+  }
+  .cta-glow {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 60% 50% at 50% 50%, #1aff5a0f, transparent);
+    pointer-events: none;
+  }
+  .cta-section h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2.4rem, 5vw, 4.5rem);
+    font-weight: 800; letter-spacing: -0.03em;
+    margin-bottom: 1.5rem;
+  }
+  .cta-section h2 span { color: var(--green); }
+  .cta-section p { color: var(--muted); font-size: 1.1rem; max-width: 480px; margin: 0 auto 3rem; line-height: 1.7; }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 2.5rem 4rem;
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 1rem;
+  }
+  .footer-logo { font-family: 'Syne', sans-serif; font-weight: 800; color: var(--green); }
+  .footer-logo span { color: var(--muted); font-weight: 400; font-size: 0.85rem; margin-left: 0.5rem; }
+  .footer-copy { font-size: 0.82rem; color: var(--muted); }
+
+  /* SCROLL REVEAL */
+  .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* DIVIDER */
+  .divider { height: 1px; background: var(--border); }
+
+  /* RESPONSIVE */
+  @media(max-width:768px){
+    nav { padding: 1.2rem 1.5rem; }
+    .nav-links { display: none; }
+    footer { padding: 2rem; flex-direction: column; text-align: center; }
+    .hero-stats { gap: 2rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursor-ring"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">Unity<span>Rides</span></div>
+  <ul class="nav-links">
+    <li><a href="#problem">Problem</a></li>
+    <li><a href="#how">How It Works</a></li>
+    <li><a href="#model">Business</a></li>
+    <li><a href="#market">Market</a></li>
+    <li><a href="#team">Team</a></li>
+  </ul>
+  <button class="nav-cta">Get Early Access</button>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="grid-bg"></div>
+  <div class="hero-glow"></div>
+  <div class="bike-float">🚲</div>
+  <div class="bike-float">⚡</div>
+  <div class="bike-float">🌿</div>
+  <div style="position:relative;z-index:2;">
+    <div class="hero-badge">Smart Mobility · India 2025</div>
+    <h1>
+      <span class="line-green">Ride Green.</span>
+      Ride Easy.
+      <span class="line-dim">Zero emissions. Zero hassle.</span>
+    </h1>
+    <p class="hero-sub">
+      India's next-gen e-bike rental platform. Tap, unlock, ride — making urban commutes faster, cleaner, and dramatically more affordable.
+    </p>
+    <div class="hero-buttons">
+      <button class="btn-primary">🚀 Launch App</button>
+      <button class="btn-outline">Watch Demo →</button>
+    </div>
+    <div class="hero-stats">
+      <div class="stat">
+        <div class="stat-num">₹5</div>
+        <div class="stat-label">Per Km</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">0g</div>
+        <div class="stat-label">CO₂ Emissions</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">3s</div>
+        <div class="stat-label">Unlock Time</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">24/7</div>
+        <div class="stat-label">Availability</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-wrap">
+  <div class="marquee-track">
+    <div class="marquee-item"><span class="marquee-dot">●</span> Zero Emissions</div>
+    <div class="marquee-item"><span class="marquee-dot">●</span> Smart IoT Fleet</div>
+    <div class="marquee-item"><span class="marquee-dot">●</span> GPS Tracking</div>
+    <div class="marquee-item"><span class="marquee-dot">●</span> Instant Unlock</div>
+    <div class="marquee-item"><span class="marquee-dot">●</span> Digital Payments</div>
+    <div class="marquee-item"><span class="marquee-dot">●</span> Last-Mile Solution</div>
+    <div class="marquee-item"><span class="marquee-dot">●</span> Eco-Friendly</div>
+    <div class="marquee-item"><span class="marquee-dot">●</span> Affordable Rides</div>
+    <!-- Duplicate for seamless loop -->
+    <div class="marquee-item"><span class="marquee-dot">●</span> Zero Emissions</div>
+    <div class="marquee-item"><span class="marquee-dot">●</span> Smart IoT Fleet</div>
+    <div class="marquee-item"><span class="marquee-dot">●</span> GPS Tracking</div>
+    <div class="marquee-item"><span class="marquee-dot">●</span> Instant Unlock</div>
+    <div class="marquee-item"><span class="marquee-dot">●</span> Digital Payments</div>
+    <div class="marquee-item"><span class="marquee-dot">●</span> Last-Mile Solution</div>
+    <div class="marquee-item"><span class="marquee-dot">●</span> Eco-Friendly</div>
+    <div class="marquee-item"><span class="marquee-dot">●</span> Affordable Rides</div>
+  </div>
+</div>
+
+<!-- PROBLEM & SOLUTION -->
+<section id="problem">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">The Problem</div>
+      <h2 class="section-title">Urban India is broken.<br>We're fixing it.</h2>
+      <p class="section-desc">Indian cities face a perfect storm of congestion, pollution, and expensive last-mile gaps. Unity Rides tackles all four at once.</p>
+    </div>
+    <div class="problems-grid">
+      <div class="problem-card reveal">
+        <div class="problem-icon">🚗</div>
+        <div class="problem-title">Traffic Gridlock</div>
+        <div class="problem-text">Millions of hours lost daily to congestion in Indian metros, crippling productivity and quality of life.</div>
+        <div class="problem-solution">✓ E-bikes zip through traffic in dedicated lanes, cutting commute times by up to 60%.</div>
+      </div>
+      <div class="problem-card reveal">
+        <div class="problem-icon">💸</div>
+        <div class="problem-title">High Transport Costs</div>
+        <div class="problem-text">Fuel, autos, and cabs drain wallets — especially for students and daily wage workers.</div>
+        <div class="problem-solution">✓ Pay-per-ride from ₹5/km or monthly plans as low as ₹299.</div>
+      </div>
+      <div class="problem-card reveal">
+        <div class="problem-icon">😤</div>
+        <div class="problem-title">Last-Mile Disconnect</div>
+        <div class="problem-text">Short 1–5 km trips are awkward — too close for cabs, too far to walk.</div>
+        <div class="problem-solution">✓ Docking stations at Metro exits, colleges & offices for seamless connectivity.</div>
+      </div>
+      <div class="problem-card reveal">
+        <div class="problem-icon">🌫️</div>
+        <div class="problem-title">Air Pollution Crisis</div>
+        <div class="problem-text">India holds 9 of the world's 10 most polluted cities. Every petrol vehicle adds to the crisis.</div>
+        <div class="problem-solution">✓ 100% electric fleet. Zero tailpipe emissions. Pure, clean urban air.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how" style="background: var(--surface);">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">The Experience</div>
+      <h2 class="section-title">Three taps.<br>You're riding.</h2>
+    </div>
+    <div class="how-grid">
+      <div class="phone-mockup reveal">
+        <div class="phone-screen">
+          <div class="phone-header">
+            <div class="phone-logo">⚡ Unity</div>
+            <div class="phone-notif"></div>
+          </div>
+          <div class="map-area">
+            <div class="map-grid"></div>
+            <div class="map-pin"></div>
+            <div class="bike-dots"></div>
+            <div class="bike-dots"></div>
+            <div class="bike-dots"></div>
+            <div class="map-label">🚲 8 bikes nearby</div>
+          </div>
+          <div class="info-row">
+            <div class="info-item">
+              <div class="info-val">0.3km</div>
+              <div class="info-key">Nearest Bike</div>
+            </div>
+            <div class="info-item">
+              <div class="info-val">₹12</div>
+              <div class="info-key">Est. Cost</div>
+            </div>
+            <div class="info-item">
+              <div class="info-val">87%</div>
+              <div class="info-key">Battery</div>
+            </div>
+          </div>
+          <div class="ride-btn">Unlock Nearest Bike →</div>
+        </div>
+      </div>
+      <div class="steps reveal">
+        <div class="step">
+          <div class="step-num">01</div>
+          <div>
+            <div class="step-title">Open & Locate</div>
+            <div class="step-desc">Launch the Unity Rides app. The map instantly shows available e-bikes and docking stations near you with real-time battery levels.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">02</div>
+          <div>
+            <div class="step-title">Unlock & Ride</div>
+            <div class="step-desc">Tap to reserve, walk to the bike, and scan the QR code. The IoT lock pops open in under 3 seconds. Start riding immediately.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">03</div>
+          <div>
+            <div class="step-title">Dock & Pay</div>
+            <div class="step-desc">Return to any docking station. Payment is auto-deducted via UPI, Paytm, or card. Get a green receipt for your CO₂ saved.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BUSINESS MODEL -->
+<section id="model" class="biz-section">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Business Model</div>
+      <h2 class="section-title">Four revenue streams.<br>One lean operation.</h2>
+      <p class="section-desc">Diversified income with low overhead through predictive maintenance, efficient fleet management, and strategic docking placement.</p>
+    </div>
+    <div class="biz-grid">
+      <div class="biz-card reveal">
+        <div class="biz-card-accent"></div>
+        <div class="biz-icon">⚡</div>
+        <div class="biz-title">Pay-Per-Ride</div>
+        <div class="biz-desc">Flexible, short-term rentals for casual users and tourists. Low friction entry — no subscription needed.</div>
+        <div class="biz-tag">Core Revenue</div>
+      </div>
+      <div class="biz-card reveal">
+        <div class="biz-card-accent"></div>
+        <div class="biz-icon">📅</div>
+        <div class="biz-title">Monthly Subscriptions</div>
+        <div class="biz-desc">Recurring revenue from daily commuters and students opting for cost-effective long-term unlimited plans.</div>
+        <div class="biz-tag">Recurring MRR</div>
+      </div>
+      <div class="biz-card reveal">
+        <div class="biz-card-accent"></div>
+        <div class="biz-icon">🏢</div>
+        <div class="biz-title">Corporate Tie-Ups</div>
+        <div class="biz-desc">Dedicated fleets and private stations for campuses, business parks, and hotels. Bulk B2B contracts.</div>
+        <div class="biz-tag">B2B Revenue</div>
+      </div>
+      <div class="biz-card reveal">
+        <div class="biz-card-accent"></div>
+        <div class="biz-icon">📣</div>
+        <div class="biz-title">Station Advertising</div>
+        <div class="biz-desc">Docking stations and bikes as high-visibility ad surfaces for local and national brands.</div>
+        <div class="biz-tag">Ad Revenue</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MARKET -->
+<section id="market">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Market Opportunity</div>
+      <h2 class="section-title">The timing has<br>never been better.</h2>
+    </div>
+    <div class="market-grid">
+      <div class="market-bars reveal">
+        <div class="bar-item">
+          <div class="bar-label"><span>India E-Mobility Market Growth</span><span>↑ 36% YoY</span></div>
+          <div class="bar-track"><div class="bar-fill" style="width:85%"></div></div>
+        </div>
+        <div class="bar-item">
+          <div class="bar-label"><span>Govt Green Transport Initiatives</span><span>↑ 58% Budget</span></div>
+          <div class="bar-track"><div class="bar-fill" style="width:72%"></div></div>
+        </div>
+        <div class="bar-item">
+          <div class="bar-label"><span>Urban Millennial Adoption Rate</span><span>↑ 42%</span></div>
+          <div class="bar-track"><div class="bar-fill" style="width:65%"></div></div>
+        </div>
+        <div class="bar-item">
+          <div class="bar-label"><span>Last-Mile Connectivity Gap</span><span>91M users</span></div>
+          <div class="bar-track"><div class="bar-fill" style="width:91%"></div></div>
+        </div>
+      </div>
+      <div class="market-points reveal">
+        <div class="market-point">
+          <div class="mp-icon">🏙️</div>
+          <div>
+            <div class="mp-title">Urban Commuters</div>
+            <div class="mp-desc">Millions of office workers frustrated by expensive, slow transport options in Tier-1 & Tier-2 cities.</div>
+          </div>
+        </div>
+        <div class="market-point">
+          <div class="mp-icon">🎓</div>
+          <div>
+            <div class="mp-title">Students</div>
+            <div class="mp-desc">Price-sensitive college students seeking affordable, cool, eco-conscious campus transport.</div>
+          </div>
+        </div>
+        <div class="market-point">
+          <div class="mp-icon">✈️</div>
+          <div>
+            <div class="mp-title">Tourists</div>
+            <div class="mp-desc">Domestic and international tourists wanting flexible, fun, and eco-friendly city exploration.</div>
+          </div>
+        </div>
+        <div class="market-point">
+          <div class="mp-icon">🌿</div>
+          <div>
+            <div class="mp-title">Govt Push</div>
+            <div class="mp-desc">FAME II scheme and state EV policies create massive tailwinds for electric shared mobility.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TECH -->
+<section style="background: var(--surface);">
+  <div class="container">
+    <div class="reveal" style="text-align:center; max-width:700px; margin:0 auto 4rem;">
+      <div class="section-label">Technology Stack</div>
+      <h2 class="section-title">IoT meets urban mobility</h2>
+      <p class="section-desc" style="margin:0 auto;">Every bike is a smart device. Every ride generates data that makes the next one better.</p>
+    </div>
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:1.2rem;" class="reveal">
+      <div class="biz-card" style="text-align:center;">
+        <div style="font-size:2.5rem; margin-bottom:0.8rem;">📱</div>
+        <div class="biz-title">Mobile App</div>
+        <div class="biz-desc">iOS & Android. Real-time maps, QR unlock, trip history.</div>
+      </div>
+      <div class="biz-card" style="text-align:center;">
+        <div style="font-size:2.5rem; margin-bottom:0.8rem;">🛰️</div>
+        <div class="biz-title">GPS Tracking</div>
+        <div class="biz-desc">Live fleet tracking, geo-fencing, and theft prevention.</div>
+      </div>
+      <div class="biz-card" style="text-align:center;">
+        <div style="font-size:2.5rem; margin-bottom:0.8rem;">🔌</div>
+        <div class="biz-title">IoT Sensors</div>
+        <div class="biz-desc">Battery health, lock status, and predictive maintenance.</div>
+      </div>
+      <div class="biz-card" style="text-align:center;">
+        <div style="font-size:2.5rem; margin-bottom:0.8rem;">💳</div>
+        <div class="biz-title">Digital Payments</div>
+        <div class="biz-desc">UPI, Paytm, cards. Instant, secure transactions.</div>
+      </div>
+      <div class="biz-card" style="text-align:center;">
+        <div style="font-size:2.5rem; margin-bottom:0.8rem;">🤖</div>
+        <div class="biz-title">AI Analytics</div>
+        <div class="biz-desc">Demand prediction, smart pricing, route optimization.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TEAM -->
+<section id="team">
+  <div class="container">
+    <div class="reveal" style="text-align:center; margin-bottom:1rem;">
+      <div class="section-label">The Builders</div>
+      <h2 class="section-title">Meet the team</h2>
+    </div>
+    <div class="team-grid">
+      <div class="team-card reveal">
+        <div class="avatar">RR</div>
+        <div class="team-name">Rishi Raj Choudhary</div>
+        <div class="team-id">2025-CSE-054</div>
+        <div class="team-role">Founder & Tech Lead</div>
+      </div>
+      <div class="team-card reveal">
+        <div class="avatar">SK</div>
+        <div class="team-name">Sushant Kumar</div>
+        <div class="team-id">2025-CSE-352</div>
+        <div class="team-role">Co-Founder & Strategy</div>
+      </div>
+      <div class="team-card reveal">
+        <div class="avatar">VK</div>
+        <div class="team-name">Vandana Kumari</div>
+        <div class="team-id">2025-CSE-352</div>
+        <div class="team-role">Product & Design</div>
+      </div>
+      <div class="team-card reveal">
+        <div class="avatar">KK</div>
+        <div class="team-name">Kajal Kumari</div>
+        <div class="team-id">2025-CSE-012</div>
+        <div class="team-role">Business & Growth</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="cta-glow"></div>
+  <div class="grid-bg" style="opacity:0.3;"></div>
+  <div style="position:relative;z-index:2;" class="reveal">
+    <div class="hero-badge" style="margin-bottom:2rem;">Launching Soon in Your City</div>
+    <h2>Let's Ride Towards<br><span>A Greener Future.</span></h2>
+    <p>Join thousands of commuters ready to ditch traffic, cut costs, and breathe cleaner air — one ride at a time.</p>
+    <div class="hero-buttons">
+      <button class="btn-primary">🚲 Get Early Access</button>
+      <button class="btn-outline">Partner With Us →</button>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">⚡ UnityRides <span>· Ride Green. Ride Easy.</span></div>
+  <div class="footer-copy">© 2025 Unity Rides · CSE Hackathon Project · Made with 💚</div>
+</footer>
+
+<script>
+  // Custom cursor
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursor-ring');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+  document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+  function animCursor() {
+    cursor.style.left = mx + 'px'; cursor.style.top = my + 'px';
+    rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12;
+    ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+    requestAnimationFrame(animCursor);
+  }
+  animCursor();
+  document.querySelectorAll('button, a, .problem-card, .biz-card, .team-card, .market-point').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      cursor.style.width = '20px'; cursor.style.height = '20px';
+      ring.style.width = '56px'; ring.style.height = '56px';
+    });
+    el.addEventListener('mouseleave', () => {
+      cursor.style.width = '12px'; cursor.style.height = '12px';
+      ring.style.width = '36px'; ring.style.height = '36px';
+    });
+  });
+
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 80);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  reveals.forEach(el => observer.observe(el));
+
+  // Stagger cards in grids
+  document.querySelectorAll('.problems-grid .problem-card, .biz-grid .biz-card, .team-grid .team-card').forEach((card, i) => {
+    card.style.transitionDelay = (i * 0.1) + 's';
+  });
+
+  // Counter animation
+  document.querySelectorAll('.stat-num').forEach(el => {
+    const text = el.textContent;
+    const num = parseFloat(text);
+    if(!isNaN(num)){
+      let start = 0;
+      const duration = 1800;
+      const startTime = performance.now();
+      function update(now){
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const curr = (num * eased).toFixed(num % 1 !== 0 ? 1 : 0);
+        el.textContent = text.replace(String(num), curr);
+        if(progress < 1) requestAnimationFrame(update);
+      }
+      // Trigger on visibility
+      new IntersectionObserver(entries => {
+        if(entries[0].isIntersecting){ requestAnimationFrame(update); }
+      }, {threshold:1}).observe(el);
+    }
+  });
+</script>
+</body>
+</html>
